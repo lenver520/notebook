@@ -1,3 +1,5 @@
+<script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"> </script>
+
 # 常用公式
 
 ## 希腊字母表
@@ -32,6 +34,16 @@ $$
 \sin^2\theta+\cos^2\theta=1 \\
 \tan^2\theta+1^2=\sec^2\theta \\
 \cot^2\theta+1^2=\csc^2\theta
+\end{aligned}
+\right.
+$$
+
+$$
+\left \{
+\begin{aligned}
+\sin \theta \cdot \csc \theta=1 \\
+\tan \theta \cdot \cot \theta=1 \\
+\cos \theta \cdot \sec \theta=1 \\
 \end{aligned}
 \right.
 $$
