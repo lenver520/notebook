@@ -49,7 +49,7 @@ print(sess.run(a+b))
 
 ## 交叉编译
 
-### CMake交叉编译设置文件`toolChain.cmake`
+### CMake交叉编译设置文件`toolchain.cmake`
 
 ```cmake
 # this is required
@@ -80,7 +80,7 @@ SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
     cd gflags
     mkdir build
     cd build
-    cmake .. -DCMAKE_TOOLCHAIN_FILE=../../toolChain.cmake -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_SHARED_LIBS=1
+    cmake .. -DCMAKE_TOOLCHAIN_FILE=../../toolchain.cmake -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_SHARED_LIBS=1
     make -j4
     make install DESTDIR=../../install
 
@@ -90,7 +90,7 @@ SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
     cd glog
     mkdir build
     cd build
-    cmake .. -DCMAKE_TOOLCHAIN_FILE=../../toolChain.cmake -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_SHARED_LIBS=1
+    cmake .. -DCMAKE_TOOLCHAIN_FILE=../../toolchain.cmake -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_SHARED_LIBS=1
     make -j4
     make install DESTDIR=../../install
 
@@ -99,7 +99,8 @@ SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
     git clone https://github.com/google/snappy.git
     cd snappy
     mkdir build
-    cmake .. -DCMAKE_TOOLCHAIN_FILE=../../toolChain.cmake -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_SHARED_LIBS=1
+    cd build
+    cmake .. -DCMAKE_TOOLCHAIN_FILE=../../toolchain.cmake -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_SHARED_LIBS=1
     make -j4
     make install DESTDIR=../../install
 
@@ -115,6 +116,7 @@ SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 ./configure --prefix=/usr
 make -j4
 sudo make install
+make distclean
 ```
 
 - 编译Target版本
@@ -133,7 +135,7 @@ make install DESTDIR=../install
 if defined(PNG_ARM_NEON) && (defined(__ARM_NEON__) || defined(__ARM_NEON)) && \
 ```
 
-    cmake .. -DCMAKE_TOOLCHAIN_FILE=../../toolChain.cmake -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_SHARED_LIBS=1 -DBUILD_opencv_apps=0 -DBUILD_TESTS=0 -DBUILD_PERF_TESTS=0 -DWITH_GSTREAMER=0 -DENABLE_PRECOMPILED_HEADERS=0
+    cmake .. -DCMAKE_TOOLCHAIN_FILE=../../toolchain.cmake -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_SHARED_LIBS=1 -DBUILD_opencv_apps=0 -DBUILD_TESTS=0 -DBUILD_PERF_TESTS=0 -DWITH_GSTREAMER=0 -DENABLE_PRECOMPILED_HEADERS=0
     make -j4
     make install DESTDIR=../../install
 
@@ -157,7 +159,7 @@ if defined(PNG_ARM_NEON) && (defined(__ARM_NEON__) || defined(__ARM_NEON)) && \
     git clone https://github.com/google/leveldb.git
     cd leveldb
     mkdir build
-    cmake .. -DCMAKE_TOOLCHAIN_FILE=../../toolChain.cmake -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_SHARED_LIBS=1
+    cmake .. -DCMAKE_TOOLCHAIN_FILE=../../toolchain.cmake -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_SHARED_LIBS=1
     make -j4
     make install DESTDIR=../../install
 
@@ -174,7 +176,37 @@ if defined(PNG_ARM_NEON) && (defined(__ARM_NEON__) || defined(__ARM_NEON)) && \
 
     mkdir build
     cd build
-    cmake .. -DCMAKE_TOOLCHAIN_FILE=../../toolChain.cmake -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_SHARED_LIBS=1 -DBUILD_TESTING=0 -DHDF5_BUILD_EXAMPLES=0
+
+- CMake配置两次(忽略错误)，再编译，生成`H5detect`和`H5make_libsettings`工具
+
+```shell
+cmake .. -DCMAKE_TOOLCHAIN_FILE=../../toolchain.cmake -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_SHARED_LIBS=1 -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=0 -DHDF5_BUILD_EXAMPLES=0
+cmake .. -DCMAKE_TOOLCHAIN_FILE=../../toolchain.cmake -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_SHARED_LIBS=1 -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=0 -DHDF5_BUILD_EXAMPLES=0
+make -j2
+```
+
+- 将`H5detect`，`H5make_libsettings`和`libhdf5.settings`放到板上生成.c文件
+
+```shell
+./H5detect > H5Tinit.c
+./H5make_libsettings > H5lib_settings.c
+```
+
+- 将生成的.c文件再放到编译目录中，修改两工具成为空文件或脚本，继续编译
+
+```shell
+echo > bin/H5detect
+echo > bin/H5make_libsettings
+make -j2
+make install DESTDIR=../../install
+```
+
+### Atlas(V3.10.3)
+
+    https://sourceforge.net/projects/math-atlas/files/
+    mkdir build
+    ../configure --shared --nof77 --prefix=/usr -b 64 -D c --gcc3pass="$CC",$AS:$LD --with-netlib-lapack-tarfile=/mnt/hgfs/vmshare/ANN/lapack-3.4.0.tgz
+
 
 ### Caffe
 
@@ -182,5 +214,5 @@ if defined(PNG_ARM_NEON) && (defined(__ARM_NEON__) || defined(__ARM_NEON)) && \
     cd caffe
     mkdir build
     cd build
-    cmake .. -DCMAKE_TOOLCHAIN_FILE=../../toolChain.cmake -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_SHARED_LIBS=1 -DCPU_ONLY=1 -DBUILD_docs=0 
+    cmake .. -DCMAKE_TOOLCHAIN_FILE=../../toolchain.cmake -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_SHARED_LIBS=1 -DCPU_ONLY=1 -DBUILD_docs=0 
 
